@@ -1,8 +1,23 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 import pyodbc
+import os
 
 app = Flask(__name__, template_folder='Templates')
 app.config['SECRET_KEY'] = 'tu_clave_secreta_aqui_cambiala_en_produccion'  # Necesaria para flash messages
+
+def get_db_connection():
+    """
+    Crea y retorna una conexión a la base de datos SQL Server.
+    Lee las credenciales desde variables de entorno con valores por defecto.
+    """
+    server = os.getenv('DB_SERVER', '179.61.14.224\\SQLEXPRESS')
+    database = os.getenv('DB_DATABASE', 'hm_inversiones')
+    username = os.getenv('DB_USERNAME', 'sa')
+    password = os.getenv('DB_PASSWORD', 'HMplanillas2020')
+    
+    connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+    
+    return pyodbc.connect(connection_string)
 
 @app.route('/')
 def hola_mundo():
@@ -11,18 +26,8 @@ def hola_mundo():
 @app.route('/datos')
 def mostrar_datos():
     try:
-        # Configuración de conexión a SQL Server
-        # Ajusta estos parámetros según tu configuración
-        server = '179.61.14.224\SQLEXPRESS'  # o 'localhost\\SQLEXPRESS' para Express
-        database = 'hm_inversiones'  # Cambia por el nombre de tu base de datos
-        username = 'sa'  # Cambia por tu usuario
-        password = 'HMplanillas2020'  # Cambia por tu contraseña
-        
-        # Cadena de conexión
-        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
-        
         # Conectar a la base de datos
-        conn = pyodbc.connect(connection_string)
+        conn = get_db_connection()
         cursor = conn.cursor()
         
         # Consultar los datos
@@ -106,17 +111,8 @@ def buscar():
         # Obtener el término de búsqueda del parámetro GET
         busqueda = request.args.get('busqueda', '').strip()
         
-        # Configuración de conexión a SQL Server
-        server = '179.61.14.224\SQLEXPRESS'
-        database = 'hm_inversiones'
-        username = 'sa'
-        password = 'HMplanillas2020'
-        
-        # Cadena de conexión
-        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
-        
         # Conectar a la base de datos
-        conn = pyodbc.connect(connection_string)
+        conn = get_db_connection()
         cursor = conn.cursor()
         
         # Si hay un término de búsqueda, realizar la consulta
@@ -228,17 +224,8 @@ def agregar():
             flash('Por favor, complete todos los campos.', 'warning')
             return redirect(url_for('buscar'))
         
-        # Configuración de conexión a SQL Server
-        server = '179.61.14.224\SQLEXPRESS'
-        database = 'hm_inversiones'
-        username = 'sa'
-        password = 'HMplanillas2020'
-        
-        # Cadena de conexión
-        connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
-        
         # Conectar a la base de datos
-        conn = pyodbc.connect(connection_string)
+        conn = get_db_connection()
         cursor = conn.cursor()
         
         # Insertar el nuevo registro en la tabla sy_person
