@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Nóminas - Dashboard</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            overflow-x: hidden;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 250px;
+            background-color: #212529;
+            padding: 0;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .sidebar .sidebar-header {
+            padding: 1.5rem;
+            background-color: #1a1d20;
+            border-bottom: 1px solid #343a40;
+        }
+        
+        .sidebar .sidebar-header h4 {
+            color: #fff;
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .sidebar .nav {
+            padding: 1rem 0;
+        }
+        
+        .sidebar .nav-item {
+            margin: 0.25rem 0;
+        }
+        
+        .sidebar .nav-link {
+            color: #adb5bd;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: #343a40;
+            color: #fff;
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+        
+        .sidebar .nav-link.disabled {
+            color: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        .sidebar .nav-link.disabled:hover {
+            background-color: transparent;
+            color: #6c757d;
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar .nav-link .bi-chevron-down {
+            margin-left: auto;
+            font-size: 0.875rem;
+        }
+        
+        /* Submenu */
+        .sidebar .submenu {
+            padding-left: 2.5rem;
+            background-color: #1a1d20;
+        }
+        
+        .sidebar .submenu .nav-link {
+            padding: 0.5rem 1.5rem;
+            font-size: 0.9rem;
+        }
+        
+        /* Contenido principal */
+        .main-content {
+            margin-left: 250px;
+            min-height: 100vh;
+            background-color: #fff;
+            padding: 2rem;
+        }
+        
+        /* Efecto de iluminación al pasar el ratón sobre las filas de la tabla */
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+        .table tbody tr:hover {
+            background-color: #e3f2fd !important;
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+            transform: scale(1.01);
+            cursor: pointer;
+        }
+        .table tbody tr:hover td {
+            color: #1976d2;
+            font-weight: 500;
+        }
+        
+        /* Título de página */
+        .page-title {
+            color: #212529;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h4><i class="bi bi-building"></i> Gestión ERP</h4>
+        </div>
+        <ul class="nav flex-column">
+            <!-- Maestros -->
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="collapse" href="#maestrosMenu" role="button" aria-expanded="true">
+                    <i class="bi bi-folder"></i>
+                    <span>Maestros</span>
+                    <i class="bi bi-chevron-down"></i>
+                </a>
+                <div class="collapse show" id="maestrosMenu">
+                    <ul class="nav flex-column submenu">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/buscar">
+                                <i class="bi bi-people"></i>
+                                <span>Usuarios</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            
+            <!-- Procesos -->
+            <li class="nav-item">
+                <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">
+                    <i class="bi bi-gear"></i>
+                    <span>Procesos</span>
+                </a>
+            </li>
+            
+            <!-- Reportes -->
+            <li class="nav-item">
+                <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>Reportes</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    
+    <!-- Contenido Principal -->
+    <div class="main-content">
+        <!-- Título de página -->
+        <h1 class="page-title">
+            <i class="bi bi-people-fill me-2"></i>Gestión de Usuarios
+        </h1>
+        
+        <!-- Mensajes Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {% if category == 'success' %}
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                        {% elif category == 'danger' %}
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        {% elif category == 'warning' %}
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                        {% else %}
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                        {% endif %}
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Formulario para agregar nuevo usuario -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">
+                    <i class="bi bi-person-plus me-2"></i>Agregar Nuevo Usuario
+                </h5>
+                <form action="/agregar" method="POST" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="codigo" class="form-label">Código</label>
+                        <input type="text" 
+                               class="form-control form-control-lg" 
+                               name="codigo" 
+                               id="codigo" 
+                               placeholder="Ingrese el código..." 
+                               required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" 
+                               class="form-control form-control-lg" 
+                               name="nombre" 
+                               id="nombre" 
+                               placeholder="Ingrese el nombre del usuario..." 
+                               required>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-success btn-lg w-100">
+                            <i class="bi bi-save me-2"></i>
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Formulario de búsqueda -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">
+                    <i class="bi bi-search me-2"></i>Buscar Usuarios
+                </h5>
+                <form action="/buscar" method="GET" class="row g-3">
+                    <div class="col-md-10">
+                        <input type="text" 
+                               class="form-control form-control-lg" 
+                               name="busqueda" 
+                               id="busqueda" 
+                               placeholder="Buscar por nombre o ID..." 
+                               value="{{ request.args.get('busqueda', '') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-search me-2"></i>
+                            Buscar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Tabla de resultados -->
+        {% if resultados %}
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-table me-2"></i>Resultados de la búsqueda
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th scope="col"><i class="bi bi-hash me-1"></i>ID</th>
+                                <th scope="col"><i class="bi bi-person me-1"></i>Nombre</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for resultado in resultados %}
+                            <tr>
+                                <td>{{ resultado.id }}</td>
+                                <td>{{ resultado.nombre }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% elif request.args.get('busqueda') %}
+        <div class="alert alert-info mt-4" role="alert">
+            <h4 class="alert-heading">
+                <i class="bi bi-info-circle me-2"></i>Sin resultados
+            </h4>
+            <p>No se encontraron usuarios que coincidan con la búsqueda: <strong>"{{ request.args.get('busqueda') }}"</strong></p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
